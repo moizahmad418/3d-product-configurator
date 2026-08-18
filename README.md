@@ -151,11 +151,6 @@ called anything. See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
 
 ## Live Demo
 
-Once deployed, your app is available at
-`https://<your-username>.github.io/<your-repo-name>/`.
+Demo: [3D Product configurator](https://moizahmad418.github.io/3d-product-configurator/)
 
-Original project demo: [Product configurator 3D](https://gorhorvat.github.io/product-configurator-3d/)
-
-## License
-
-MIT License
+-----
