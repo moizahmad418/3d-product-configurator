@@ -1,0 +1,84 @@
+name: Deploy to GitHub Pages
+
+# Runs on every push to main, and can also be triggered by hand from the
+# Actions tab. Pull requests get a build check only — they never deploy.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If you push twice quickly, let the newer run win.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint
+        # Warnings shouldn't be able to block a deploy.
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Work out the base path from the repository name
+        # This is what makes the repo name irrelevant:
+        #   repo named "<owner>.github.io" -> served from "/"
+        #   any other repo name           -> served from "/<repo-name>/"
+        id: base
+        run: |
+          REPO="${GITHUB_REPOSITORY#*/}"
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          if [ "${REPO,,}" = "${OWNER,,}.github.io" ]; then
+            BASE="/"
+          else
+            BASE="/$REPO/"
+          fi
+          echo "path=$BASE" >> "$GITHUB_OUTPUT"
+          echo "Building for base path: $BASE"
+
+      - name: Build
+        env:
+          VITE_BASE_PATH: ${{ steps.base.outputs.path }}
+        run: npm run build
+
+      - name: Upload the built site
+        # Only pushes to main produce something to deploy.
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
