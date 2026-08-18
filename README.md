@@ -153,11 +153,11 @@ called anything. See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
 
 Demo: [3D Product configurator](https://moizahmad418.github.io/3d-product-configurator/)
 
------
-
 ## Portfolio Author
 
 **Moiz Ahmad**
 
 - Email: moizahmad418@gmail.com
 - LinkedIn: https://www.linkedin.com/in/moizahmad418
+
+-----
